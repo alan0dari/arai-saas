@@ -16,38 +16,9 @@ export type Json =
 
 export interface Database {
   public: {
-    Tables: {
-      // Los tipos de tablas se generarán aquí
-      // Ejemplo de estructura esperada:
-      /*
-      tenants: {
-        Row: {
-          id: string;
-          name: string;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          name: string;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: {
-          id?: string;
-          name?: string;
-          created_at?: string;
-          updated_at?: string;
-        };
-      };
-      */
-    };
-    Views: {
-      // Vistas SQL
-    };
-    Functions: {
-      // Funciones SQL
-    };
+    Tables: Record<string, never>;
+    Views: Record<string, never>;
+    Functions: Record<string, never>;
     Enums: {
       // Enums personalizados
       user_role: "super_admin" | "tenant_admin" | "user";
