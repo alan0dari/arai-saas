@@ -2,17 +2,28 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { z } from "zod";
 import { createServerClient } from "@/lib/supabase";
 
-export async function login(formData: FormData) {
-  const supabase = await createServerClient();
+const authSchema = z.object({
+  email: z.string().email("Email inválido"),
+  password: z.string().min(6, "La contraseña debe tener al menos 6 caracteres"),
+});
 
-  const data = {
-    email: formData.get("email") as string,
-    password: formData.get("password") as string,
+export async function login(formData: FormData) {
+  const rawData = {
+    email: formData.get("email"),
+    password: formData.get("password"),
   };
 
-  const { error } = await supabase.auth.signInWithPassword(data);
+  const result = authSchema.safeParse(rawData);
+  if (!result.success) {
+    const errorMessage = result.error.errors[0]?.message ?? "Datos inválidos";
+    redirect("/login?error=" + encodeURIComponent(errorMessage));
+  }
+
+  const supabase = await createServerClient();
+  const { error } = await supabase.auth.signInWithPassword(result.data);
 
   if (error) {
     redirect("/login?error=" + encodeURIComponent(error.message));
@@ -23,14 +34,19 @@ export async function login(formData: FormData) {
 }
 
 export async function signup(formData: FormData) {
-  const supabase = await createServerClient();
-
-  const data = {
-    email: formData.get("email") as string,
-    password: formData.get("password") as string,
+  const rawData = {
+    email: formData.get("email"),
+    password: formData.get("password"),
   };
 
-  const { error } = await supabase.auth.signUp(data);
+  const result = authSchema.safeParse(rawData);
+  if (!result.success) {
+    const errorMessage = result.error.errors[0]?.message ?? "Datos inválidos";
+    redirect("/login?error=" + encodeURIComponent(errorMessage));
+  }
+
+  const supabase = await createServerClient();
+  const { error } = await supabase.auth.signUp(result.data);
 
   if (error) {
     redirect("/login?error=" + encodeURIComponent(error.message));
